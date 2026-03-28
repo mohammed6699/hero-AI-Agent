@@ -134,6 +134,8 @@ export function startBot() {
   }
 }
 
+let isBotInited = false;
+
 // Manual webhook handler is most reliable for Vercel's unique middleware environment
 export const handleWebhook = async (req: any, res: any) => {
   if (!bot) initBot();
@@ -141,9 +143,10 @@ export const handleWebhook = async (req: any, res: any) => {
   try {
     const update = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     if (update && update.update_id) {
-      if (!bot!.botInfo) {
+      if (!isBotInited) {
         console.log('Fetching bot info for first time...');
         await bot!.init();
+        isBotInited = true;
       }
       await bot!.handleUpdate(update);
     }
