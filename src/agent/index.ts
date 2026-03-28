@@ -22,9 +22,9 @@ export async function processUserMessage(userId: string, text: string): Promise<
   
   const messages: Message[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    // Note: We are using a simplified history which doesn't perfectly reconstruct tool calls from past turns,
-    // which is usually acceptable for simple persistent memory context.
-    ...dbMessages.map(m => ({ role: m.role, content: m.content } as Message))
+    // Filter history to just user/assistant for reliable prompt flow across providers
+    ...dbMessages.filter(m => m.role === 'user' || m.role === 'assistant')
+                 .map(m => ({ role: m.role, content: m.content } as Message))
   ];
 
   let iterations = 0;

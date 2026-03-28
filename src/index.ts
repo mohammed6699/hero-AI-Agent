@@ -13,7 +13,6 @@ async function initialize() {
   initDb();
   initLlm();
   initBot();
-  const { startBot } = await import('./bot/index.js');
   startBot();
   isInitialized = true;
 }
@@ -26,8 +25,11 @@ export default async (req: any, res: any) => {
 
     // Basic health check (only for GET requests)
     if (req.method === 'GET' && (req.url === '/' || req.url === '/health' || !req.url)) {
+      // Force a re-registration of the webhook if it's missing or on every health check
+      initBot();
+      startBot();
       res.writeHead(200);
-      res.end('Hero Agent is healthy');
+      res.end('Hero Agent is healthy and connected to Telegram!');
       return;
     }
 

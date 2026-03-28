@@ -79,7 +79,7 @@ async function callOpenRouter(messages: Message[]) {
   const tools = getToolDefinitions();
   
   // Use a reliable free model on OpenRouter
-  const model = "google/gemini-2.0-flash-lite:free"; 
+  const model = "google/gemini-2.0-flash-lite-preview:free"; 
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
