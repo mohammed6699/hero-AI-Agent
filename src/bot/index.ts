@@ -141,6 +141,10 @@ export const handleWebhook = async (req: any, res: any) => {
   try {
     const update = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     if (update && update.update_id) {
+      if (!bot!.botInfo) {
+        console.log('Fetching bot info for first time...');
+        await bot!.init();
+      }
       await bot!.handleUpdate(update);
     }
   } catch (err) {
