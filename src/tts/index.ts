@@ -18,7 +18,7 @@ export async function generateSpeech(text: string): Promise<Buffer | null> {
       },
       body: JSON.stringify({
         text,
-        model_id: 'eleven_turbo_v2_5',
+        model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75
@@ -27,12 +27,24 @@ export async function generateSpeech(text: string): Promise<Buffer | null> {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`ElevenLabs TTS Error: ${response.status} - ${errorText}`);
+      let errorDetail = 'Unknown Error';
+      try {
+        const errorData = await response.json();
+        errorDetail = JSON.stringify(errorData);
+        if (errorData.detail?.status === 'quota_exceeded') {
+          console.error('❌ ElevenLabs Quota Exceeded! Please check your billing/dashboard.');
+        } else {
+          console.error(`❌ ElevenLabs TTS Error (${response.status}): ${errorDetail}`);
+        }
+      } catch (e) {
+        errorDetail = await response.text();
+        console.error(`❌ ElevenLabs TTS Error (${response.status}): ${errorDetail}`);
+      }
       return null;
     }
 
     const arrayBuffer = await response.arrayBuffer();
+    console.log(`✅ TTS generated successfully (${arrayBuffer.byteLength} bytes)`);
     return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error('TTS request failed:', error);
