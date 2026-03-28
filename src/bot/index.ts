@@ -117,12 +117,24 @@ export function initBot() {
   });
 }
 
-export function startBot() {
+export async function startBot() {
   if (bot) {
-    // If a webhook URL is provided, set it. Otherwise, use long polling.
     if (config.WEBHOOK_URL && config.WEBHOOK_URL !== '') {
-      console.log(`Setting up webhook at ${config.WEBHOOK_URL}...`);
-      bot.api.setWebhook(config.WEBHOOK_URL).catch(e => console.error('Failed to set webhook:', e));
+      try {
+        const info = await bot.api.getWebhookInfo();
+        if (info.url !== config.WEBHOOK_URL) {
+          console.log(`Updating webhook from ${info.url} to ${config.WEBHOOK_URL}...`);
+          await bot.api.setWebhook(config.WEBHOOK_URL);
+        } else {
+          console.log('Webhook already correctly configured.');
+        }
+      } catch (e: any) {
+        if (e.description?.includes('retry after')) {
+          console.warn('Telegram rate limit hit for setWebhook, skipping for now.');
+        } else {
+          console.error('Failed to sync webhook:', e);
+        }
+      }
     } else {
       console.log('Starting bot with Long Polling (Local/Development mode)...');
       bot.start({
