@@ -11,6 +11,7 @@ export const config = {
   ELEVENLABS_VOICE_ID: process.env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB', 
   OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY || '',
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '',
+  FIREBASE_SERVICE_ACCOUNT: process.env.FIREBASE_SERVICE_ACCOUNT || '',
   AZURE_CLIENT_ID: process.env.AZURE_CLIENT_ID || '',
   AZURE_TENANT_ID: process.env.AZURE_TENANT_ID || '',
   NODE_ENV: process.env.NODE_ENV || 'development',

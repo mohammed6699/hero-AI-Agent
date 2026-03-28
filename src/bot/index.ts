@@ -60,7 +60,7 @@ export function initBot() {
       const response = await processUserMessage(userId, text);
       await ctx.reply(response);
     } catch (err: any) {
-      console.error(err);
+      console.error('[Bot Error - Message Handler]:', err);
       await ctx.reply('Sorry, I encountered an error while processing your request.');
     }
   });
@@ -107,7 +107,7 @@ export function initBot() {
       }
       
     } catch (err: any) {
-      console.error(err);
+      console.error('[Bot Error - Voice Handler]:', err);
       await ctx.reply('Sorry, I could not process your voice command.');
     }
   });

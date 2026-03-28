@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from 'firebase-admin/app';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, Firestore, FieldValue } from 'firebase-admin/firestore';
 import { config } from '../config/index.js';
 
@@ -6,11 +6,20 @@ let db: Firestore;
 
 export function initDb() {
   if (getApps().length === 0) {
-    // If FIREBASE_PROJECT_ID is provided in .env, use it. 
-    // Otherwise, Firebase Admin will try to find credentials automatically (e.g. from GOOGLE_APPLICATION_CREDENTIALS)
-    const appOptions = config.FIREBASE_PROJECT_ID 
-      ? { projectId: config.FIREBASE_PROJECT_ID } 
-      : {};
+    let appOptions: any = {};
+    
+    // Support for full service account JSON in an environment variable (best for Vercel)
+    if (config.FIREBASE_SERVICE_ACCOUNT) {
+      try {
+        const serviceAccount = JSON.parse(config.FIREBASE_SERVICE_ACCOUNT);
+        appOptions.credential = cert(serviceAccount);
+      } catch (e) {
+        console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', e);
+      }
+    } else if (config.FIREBASE_PROJECT_ID) {
+      appOptions.projectId = config.FIREBASE_PROJECT_ID;
+    }
+    
     initializeApp(appOptions);
   }
   db = getFirestore();
