@@ -142,7 +142,7 @@ export const handleWebhook = (req: any, res: any) => {
     initBot();
   }
   if (!memoizedWebhookHandler) {
-    memoizedWebhookHandler = webhookCallback(bot!, 'http');
+    memoizedWebhookHandler = webhookCallback(bot!, 'vercel');
   }
   return memoizedWebhookHandler(req, res);
 };
