@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.git
+memory.db
+temp_audio*
+*.txt
+Dockerfile
+.dockerignore
+firebase-key.json

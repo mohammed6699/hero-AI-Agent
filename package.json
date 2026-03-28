@@ -1,0 +1,24 @@
+{
+  "name": "hero",
+  "version": "1.0.0",
+  "description": "My personal AI Agent with Telegram Interface",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^13.7.0",
+    "grammy": "^1.30.0",
+    "groq-sdk": "^0.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

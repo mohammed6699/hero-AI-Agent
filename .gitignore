@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+dist/
+*.log
+
+# Environment & Secrets
+.env
+firebase-key.json
+memory.db
+New Text Document.txt
+
+# OS files
+.DS_Store
+Thumbs.db
