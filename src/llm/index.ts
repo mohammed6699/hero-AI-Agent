@@ -78,36 +78,47 @@ async function callGroq(messages: Message[]) {
 async function callOpenRouter(messages: Message[]) {
   const tools = getToolDefinitions();
   
-  // Use a reliable free model on OpenRouter
-  const model = "google/gemini-2.0-flash-lite-preview:free"; 
+  // Use a stable free model on OpenRouter (Gemini 2.0 Flash Lite)
+  const model = "google/gemini-2.0-flash-lite-preview-02-05:free"; 
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${config.OPENROUTER_API_KEY}`,
-      "HTTP-Referer": "https://github.com/HeroAgent", // Optional for OpenRouter
+      "HTTP-Referer": "https://github.com/HeroAgent", 
       "X-Title": "Hero Agent", 
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
       model: model,
-      messages: messages.map(m => ({ 
-        role: m.role === 'tool' ? 'user' : m.role, // Simplified for OpenRouter free models
-        content: m.content,
-        name: m.name
-      })),
-      tools: tools.length > 0 ? tools : undefined,
+      messages: messages.map(m => {
+        // Most OpenRouter models handle assistant/user/system. For tool, we map to user or follow specific format.
+        const msg: any = { 
+          role: m.role,
+          content: m.content || ""
+        };
+        if (m.tool_calls) msg.tool_calls = m.tool_calls;
+        if (m.tool_call_id) msg.tool_call_id = m.tool_call_id;
+        if (m.name) msg.name = m.name;
+        return msg;
+      }),
+      tools: tools.length > 0 ? (tools as any) : undefined,
       tool_choice: "auto"
     })
   });
 
   if (!response.ok) {
-    throw new Error(`OpenRouter API failed: ${await response.text()}`);
+    const errorText = await response.text();
+    console.error(`OpenRouter Error Response: ${errorText}`);
+    throw new Error(`OpenRouter API failed with status ${response.status}`);
   }
 
   const data = await response.json();
-  const choice = data.choices[0];
+  if (data.error) {
+    throw new Error(`OpenRouter API Error: ${data.error.message}`);
+  }
   
+  const choice = data.choices[0];
   return {
     content: choice.message.content || '',
     tool_calls: choice.message.tool_calls || []

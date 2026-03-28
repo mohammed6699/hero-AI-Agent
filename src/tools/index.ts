@@ -164,7 +164,7 @@ const search_nearby: ToolDefinition = {
   handler: async (args: any, context) => {
     let lat: number, lon: number, centerName: string;
 
-    if (args.location) {
+    if (args.location && args.location.toLowerCase() !== 'current location') {
       const info = await geocode(args.location);
       if (!info) return `Could not find center location: ${args.location}`;
       lat = info.lat;
