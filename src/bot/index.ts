@@ -134,16 +134,23 @@ export function startBot() {
   }
 }
 
-let memoizedWebhookHandler: any = null;
+// Manual webhook handler is most reliable for Vercel's unique middleware environment
+export const handleWebhook = async (req: any, res: any) => {
+  if (!bot) initBot();
 
-export const handleWebhook = (req: any, res: any) => {
-  if (!bot) {
-    // In some environments, we might need to initialize the bot on the first request
-    initBot();
+  try {
+    const update = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    if (update && update.update_id) {
+      await bot!.handleUpdate(update);
+    }
+  } catch (err) {
+    console.error('Manual Webhook Handler Error:', err);
   }
-  if (!memoizedWebhookHandler) {
-    memoizedWebhookHandler = webhookCallback(bot!, 'vercel');
+
+  // Always respond with 200 OK so Telegram doesn't retry
+  if (!res.writableEnded) {
+    res.writeHead(200);
+    res.end();
   }
-  return memoizedWebhookHandler(req, res);
 };
 
