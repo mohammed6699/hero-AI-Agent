@@ -11,13 +11,17 @@ export function initDb() {
     // Support for full service account JSON in an environment variable (best for Vercel)
     if (config.FIREBASE_SERVICE_ACCOUNT) {
       try {
-        const serviceAccount = JSON.parse(config.FIREBASE_SERVICE_ACCOUNT);
+        // Handle double-escaped newlines and trim potential whitespace
+        const cleanedJson = config.FIREBASE_SERVICE_ACCOUNT.trim();
+        const serviceAccount = JSON.parse(cleanedJson);
         appOptions.credential = cert(serviceAccount);
+        console.log('Firebase initialized with Service Account from ENV.');
       } catch (e) {
         console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', e);
       }
     } else if (config.FIREBASE_PROJECT_ID) {
       appOptions.projectId = config.FIREBASE_PROJECT_ID;
+      console.log(`Firebase initialized with Project ID: ${config.FIREBASE_PROJECT_ID} (using ADC)`);
     }
     
     initializeApp(appOptions);
