@@ -65,7 +65,7 @@ const get_current_time: ToolDefinition = {
 
 const get_weather: ToolDefinition = {
   name: 'get_weather',
-  description: 'Get the current weather for a specific location.',
+  description: 'Get the current weather for a specific location. If location is omitted, uses the user\'s current known location.',
   parameters: {
     type: 'object',
     properties: {
@@ -74,10 +74,17 @@ const get_weather: ToolDefinition = {
         description: 'The city or location name, e.g. London or San Francisco, CA'
       }
     },
-    required: ['location']
+    required: [] // No longer required, as we fallback to current location
   },
-  handler: async (args: any) => {
-    const location = args.location;
+  handler: async (args: any, context) => {
+    let location = args.location;
+    
+    if (!location || location.toLowerCase() === 'current location') {
+      const loc = await getUserLocation(context.userId);
+      if (!loc) return "I don't know your current location yet. Please use /location first or specify a city name.";
+      location = `${loc.lat},${loc.lon}`;
+    }
+
     try {
       const res = await fetch(`https://wttr.in/${encodeURIComponent(location)}?format=j1`);
       if (!res.ok) {
@@ -85,9 +92,11 @@ const get_weather: ToolDefinition = {
       }
       const data = await res.json();
       const current = data.current_condition[0];
-      return `Weather in ${location}: ${current.weatherDesc[0].value}, Temperature: ${current.temp_C}°C (${current.temp_F}°F), Feels like: ${current.FeelsLikeC}°C, Humidity: ${current.humidity}%, Wind: ${current.windspeedKmph} km/h.`;
+      const desc = current.weatherDesc[0].value;
+      const resolvedLocation = data.nearest_area?.[0]?.areaName?.[0]?.value || location;
+      return `Weather in ${resolvedLocation}: ${desc}, Temperature: ${current.temp_C}°C (${current.temp_F}°F), Feels like: ${current.FeelsLikeC}°C, Humidity: ${current.humidity}%, Wind: ${current.windspeedKmph} km/h.`;
     } catch (e: any) {
-      return `Failed to fetch weather for ${location}: ${e.message}`;
+      return `Failed to fetch weather: ${e.message}`;
     }
   }
 };

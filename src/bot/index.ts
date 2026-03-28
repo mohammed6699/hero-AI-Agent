@@ -6,6 +6,7 @@ import { saveUserLocation } from '../db/index.js';
 import Groq from 'groq-sdk';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 export let bot: Bot | null = null;
 let groq: Groq | null = null;
@@ -80,7 +81,7 @@ export function initBot() {
       const response = await fetch(url);
       const buffer = await response.arrayBuffer();
       
-      const tempPath = path.join(process.cwd(), `temp_audio_${Date.now()}.ogg`);
+      const tempPath = path.join(os.tmpdir(), `temp_audio_${Date.now()}.ogg`);
       fs.writeFileSync(tempPath, Buffer.from(buffer));
 
       const transcription = await groq.audio.transcriptions.create({
@@ -89,7 +90,7 @@ export function initBot() {
         language: 'en'
       });
 
-      fs.unlinkSync(tempPath);
+      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
 
       const text = transcription.text;
       await ctx.reply(`*Transcript:* ${text}`, { parse_mode: 'Markdown' });
